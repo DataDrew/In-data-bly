@@ -1,0 +1,112 @@
+---
+title: "Example_Shiny_Pres"
+runtime: shiny
+output: ioslides_presentation
+---
+
+## Data Quality Report {#nextsteps .emphasised}
+This report analyses the the ability to implement quality data matching, in the form of a shiny interactive document. 
+
+
+
+## Payment Types Analysis
+```{r, echo=FALSE}
+library(shiny)
+library(shinydashboard)
+All_Inc_Types<-c(11, 81, 8)
+dob_reported<-c(94, 0, 6)
+no_dob<-c(3, 90, 8)
+names(All_Inc_Types)=c("Interest", "Dividends", "Other Income")
+names(dob_reported)=c("Interest", "Dividends", "Other Income")
+names(no_dob)=c("Interest", "Dividends", "Other Income")
+lblsno<-paste(names(no_dob), no_dob, "%", sep="")
+lblsdob<-paste(names(dob_reported), dob_reported, "%", sep="")
+lblsall<-paste(names(All_Inc_Types), All_Inc_Types, "%", sep="")
+my_data<-c(All_Inc_Types, dob_reported, no_dob)
+
+  plotType<-function(x, type) {
+  switch(type, 
+         "All Income Types"=pie(All_Inc_Types, col=rainbow(length(All_Inc_Types)), main="All Income Types", labels=lblsall),
+         "Income Types with DOB Reported"=pie(dob_reported, col=rainbow(length(dob_reported)), main="Income Types with DOB Reported", labels=lblsdob),
+         "Income Types with no DOB Reported"=pie(no_dob, col=rainbow(length(no_dob)), main="Income Types with No DOB Reported", labels=lblsno))
+}
+shinyApp(
+  ui=bootstrapPage(
+    radioButtons("ptype", "Choose DOB Reporter Status:",
+                 list("All Income Types", "Income Types with DOB Reported", "Income Types with no DOB Reported")),
+    plotOutput('plot')
+  ),
+server=function(input, output) {
+    output$plot<-renderPlot({
+      plotType(myData, input$ptype)
+    })
+  } 
+)
+
+```
+
+
+
+## Findings from the preliminary analysis
+
+- The field for the DOB was overwhelmingly not reported.
+- The payment type missing most of the DOB field was the "Dividends" payment type
+- Coincidentally, the "Dividends" payment type also had the largest number of overall reporters
+- The missing DOB fields can have a significant impact on data matching initiatives
+
+
+## Analysis of the Type of Reporters
+```{r, echo=FALSE}
+Indiv<-779661
+Non_indiv<-97319
+Rep<-c(779661, 97319)
+total<-779661+97319
+
+names(Rep)<-c("Individuals", "Non-Individuals")
+lbls<-c("Individuals", "Non-Individuals")
+options(scipen=10)
+b<-barplot(Rep, col=rainbow(length(Rep)), main="Types of Reporters", ylab="Count")
+text(x=b, y=Rep/2, label=Rep, cex=0.8)
+```
+
+## TIN Analysis
+```{r, echo=FALSE}
+TIN_all<-c(122, 160, 244, 159)
+TIN_noDOB<-c(55, 47, 103)
+TIN_data<-c(TIN_all, TIN_noDOB)
+names(TIN_all)<-c("1", "2", "3", "4")
+names(TIN_noDOB)<-c("1", "5", "4")
+
+  plotType<-function(x, type) {
+  switch(type, 
+         "TIN All Reporters"=barplot(TIN_all, col=c("red", "orange", "green", "blue"), main="All Income Types"),
+         "TIN No DOB"=barplot(TIN_noDOB, col=c("red", "yellow", "blue"), main="Income Types with DOB Reported"))
+}
+shinyApp(
+  ui=bootstrapPage(
+    radioButtons("ptype", "Choose TIN Reporter Status:",
+                 list("TIN All Reporters", "TIN No DOB")),
+    plotOutput('plot')
+  ),
+server=function(input, output) {
+    output$plot<-renderPlot({
+      plotType(TIN_data, input$ptype)
+    })
+  } 
+)
+
+
+```
+
+## Findings from the TIN Analysis
+- The TIN reporter 4 had approximately 65% of all it's own reporting
+  without a DOB entered
+- Overall, the counts for the TIN analysis were quite low, as most reporters
+  did not enter a valid TIN
+
+## Further Work
+- Further work and analysis revolves around analysing the data stored in the DWH
+- Potentially provide feedback to external stakeholders to identify these issues and to remedy them
+- This will enable quality data matching to be performed, and higher accuracy to be achieved
+
+## Thank You
